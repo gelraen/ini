@@ -1,4 +1,4 @@
-// Package ini implements a parser for INI files written as an excercise.
+// Package ini implements a parser for INI files written as an exercise.
 package ini
 
 import (
