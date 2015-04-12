@@ -1,0 +1,17 @@
+document = *section
+
+section = *tail header *(kvpair / tail) 
+
+tail = ws [comment] eol
+
+eol = LF / CRLF
+
+comment = ";" *(VCHAR / WSP)
+
+header = "[" 1*alnum "]" tail
+
+kvpair = key ws "=" ws value tail
+key = 1*alnum
+alnum = ALPHA / DIGIT / "-" / "_"
+value = *(VCHAR / WSP)
+ws = *WSP
