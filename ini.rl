@@ -39,10 +39,10 @@ import (
 	ealnum = alnum | "-" | "_";
 	key = ealnum+ > tokenStart % keyEnd;
 	value = (^[;\r\n])* > tokenStart % valueEnd;
-	kvpair = key . ws . "=" . ws . value . tail;
+	kvpair = key . ws . "=" . ws . value;
 	sectionName = ealnum+ > tokenStart % sectionNameEnd;
-	header = "[" . sectionName . "]" . tail;
-	section = tail* header (kvpair | tail)*;
+	header = "[" . sectionName . "]";
+	section = tail* . header . tail . (kvpair? . tail)*;
 	document = section*;
 
 	main := document $!error;
