@@ -1,306 +1,224 @@
-// Package ini implements a parser for INI files written as an exercise.
+
+//line ini.rl:1
 package ini
 
-import (
-	"bufio"
-	"fmt"
-	"io"
-)
 
-// Document represents the content of the INI file.
-// First key is section name, second - property name.
-type Document map[string]map[string]string
+//line ini.rl:36
 
-// Parse reads data form r and returns a parsed document.
-func Parse(r io.Reader) (Document, error) {
-	p := &parser{
-		scanner: bufio.NewScanner(r),
-		line:    1,
-		pos:     1,
+
+
+//line ini.go:11
+var _ini_actions []byte = []byte{
+	0, 1, 0, 1, 1, 1, 2, 1, 3, 
+	2, 0, 3, 
+}
+
+var _ini_key_offsets []byte = []byte{
+	0, 0, 5, 11, 12, 14, 22, 31, 
+	36, 37, 48, 51, 56, 61, 63, 69, 
+}
+
+var _ini_trans_keys []byte = []byte{
+	9, 10, 13, 32, 59, 9, 10, 13, 
+	32, 59, 91, 10, 10, 13, 45, 95, 
+	48, 57, 65, 90, 97, 122, 45, 93, 
+	95, 48, 57, 65, 90, 97, 122, 9, 
+	10, 13, 32, 59, 10, 9, 32, 45, 
+	61, 95, 48, 57, 65, 90, 97, 122, 
+	9, 32, 61, 9, 10, 13, 32, 59, 
+	9, 10, 13, 32, 59, 10, 13, 9, 
+	10, 13, 32, 59, 91, 9, 10, 13, 
+	32, 45, 59, 91, 95, 48, 57, 65, 
+	90, 97, 122, 
+}
+
+var _ini_single_lengths []byte = []byte{
+	0, 5, 6, 1, 2, 2, 3, 5, 
+	1, 5, 3, 5, 5, 2, 6, 8, 
+}
+
+var _ini_range_lengths []byte = []byte{
+	0, 0, 0, 0, 0, 3, 3, 0, 
+	0, 3, 0, 0, 0, 0, 0, 3, 
+}
+
+var _ini_index_offsets []byte = []byte{
+	0, 0, 6, 13, 15, 18, 24, 31, 
+	37, 39, 48, 52, 58, 64, 67, 74, 
+}
+
+var _ini_indicies []byte = []byte{
+	0, 2, 3, 0, 4, 1, 0, 2, 
+	3, 0, 4, 5, 1, 2, 1, 2, 
+	3, 4, 6, 6, 6, 6, 6, 1, 
+	7, 8, 7, 7, 7, 7, 1, 9, 
+	10, 11, 9, 12, 1, 10, 1, 13, 
+	13, 14, 15, 14, 14, 14, 14, 1, 
+	16, 16, 17, 1, 19, 20, 21, 19, 
+	22, 18, 24, 25, 26, 24, 27, 23, 
+	10, 11, 12, 0, 2, 3, 0, 4, 
+	5, 1, 9, 10, 11, 9, 28, 12, 
+	5, 28, 28, 28, 28, 1, 
+}
+
+var _ini_trans_targs []byte = []byte{
+	1, 0, 2, 3, 4, 5, 6, 6, 
+	7, 7, 15, 8, 13, 10, 9, 11, 
+	10, 11, 12, 11, 15, 8, 13, 12, 
+	12, 15, 8, 13, 9, 
+}
+
+var _ini_trans_actions []byte = []byte{
+	0, 0, 0, 0, 0, 0, 1, 0, 
+	3, 0, 0, 0, 0, 5, 0, 5, 
+	0, 0, 1, 9, 9, 9, 9, 0, 
+	7, 7, 7, 7, 1, 
+}
+
+const ini_start int = 14
+const ini_first_final int = 14
+const ini_error int = 0
+
+const ini_en_main int = 14
+
+
+//line ini.rl:39
+
+func ragel_machine(data []byte) (Document, error) {
+	var cs,p,pe,eof int
+	eof = len(data)
+	pe = eof
+	var (
+		start int = -1
+		ret = Document{}
+		section = ""
+		key = ""
+	)
+
+
+//line ini.go:100
+	{
+	cs = ini_start
 	}
-	p.scanner.Split(bufio.ScanRunes)
-	return p.run()
-}
 
-type parser struct {
-	scanner   *bufio.Scanner
-	buf       string
-	line, pos int
-}
+//line ini.rl:52
 
-func (p *parser) run() (Document, error) {
-	return p.parseDocument()
-}
+//line ini.go:107
+	{
+	var _klen int
+	var _trans int
+	var _acts int
+	var _nacts uint
+	var _keys int
+	if p == pe {
+		goto _test_eof
+	}
+	if cs == 0 {
+		goto _out
+	}
+_resume:
+	_keys = int(_ini_key_offsets[cs])
+	_trans = int(_ini_index_offsets[cs])
 
-func (p *parser) peek() (string, error) {
-	if p.buf == "" {
-		if !p.scanner.Scan() {
-			if err := p.scanner.Err(); err != nil {
-				return "", err
+	_klen = int(_ini_single_lengths[cs])
+	if _klen > 0 {
+		_lower := int(_keys)
+		var _mid int
+		_upper := int(_keys + _klen - 1)
+		for {
+			if _upper < _lower {
+				break
 			}
-			return "", io.EOF
-		}
-		p.buf = p.scanner.Text()
-	}
-	return p.buf, nil
-}
 
-func (p *parser) match(s string) error {
-	v, err := p.peek()
-	if err != nil {
-		return err
-	}
-	if v != s {
-		return p.Errorf("unexpected character %q (want %q)", v, s)
-	}
-	p.buf = ""
-	p.pos++
-	if s == "\n" {
-		p.line++
-		p.pos = 1
-	}
-	return nil
-}
-
-func (p *parser) Errorf(f string, args ...interface{}) error {
-	return fmt.Errorf("line %d char %d: "+f, append([]interface{}{p.line, p.pos}, args...)...)
-}
-
-func isWhitespace(ch byte) bool {
-	return ch == ' ' || ch == '\x09'
-}
-
-func isAlphaNumeric(ch byte) bool {
-	return (ch >= 0x41 && ch <= 0x5A) || (ch >= 0x61 && ch <= 0x7A) || ch >= 0x80 || (ch >= '0' && ch <= '9') || ch == '-' || ch == '_'
-}
-
-func (p *parser) parseDocument() (Document, error) {
-	r := Document{}
-	for {
-		name, values, err := p.parseSection()
-		if err == io.EOF {
-			r[name] = values
-			return r, nil
-		}
-		if err != nil {
-			return r, err
-		}
-		r[name] = values
-	}
-}
-
-func (p *parser) parseSection() (string, map[string]string, error) {
-	var name string
-	values := map[string]string{}
-	var err error
-
-	for {
-		s, err := p.peek()
-		if err != nil {
-			return name, values, err
-		}
-		if !isWhitespace(s[0]) && s != ";" && s != "\r" && s != "\n" {
-			break
-		}
-		err = p.parseTail()
-		if err != nil {
-			return name, values, err
-		}
-	}
-
-	name, err = p.parseHeader()
-	if err != nil {
-		return name, values, err
-	}
-
-	for {
-		s, err := p.peek()
-		if err != nil {
-			return name, values, err
-		}
-		switch {
-		case isAlphaNumeric(s[0]):
-			k, v, err := p.parseKvpair()
-			if err != nil {
-				return name, values, err
+			_mid = _lower + ((_upper - _lower) >> 1)
+			switch {
+			case data[p] < _ini_trans_keys[_mid]:
+				_upper = _mid - 1
+			case data[p] > _ini_trans_keys[_mid]:
+				_lower = _mid + 1
+			default:
+				_trans += int(_mid - int(_keys))
+				goto _match
 			}
-			values[k] = v
-		case isWhitespace(s[0]) || s == ";" || s == "\r" || s == "\n":
-			err := p.parseTail()
-			if err != nil {
-				return name, values, err
+		}
+		_keys += _klen
+		_trans += _klen
+	}
+
+	_klen = int(_ini_range_lengths[cs])
+	if _klen > 0 {
+		_lower := int(_keys)
+		var _mid int
+		_upper := int(_keys + (_klen << 1) - 2)
+		for {
+			if _upper < _lower {
+				break
 			}
-		default:
-			return name, values, nil
-		}
-	}
-}
 
-func (p *parser) parseHeader() (string, error) {
-	err := p.match("[")
-	if err != nil {
-		return "", err
-	}
-
-	var name string
-	for {
-		s, err := p.peek()
-		if err != nil {
-			return "", err
+			_mid = _lower + (((_upper - _lower) >> 1) & ^1)
+			switch {
+			case data[p] < _ini_trans_keys[_mid]:
+				_upper = _mid - 2
+			case data[p] > _ini_trans_keys[_mid + 1]:
+				_lower = _mid + 2
+			default:
+				_trans += int((_mid - int(_keys)) >> 1)
+				goto _match
+			}
 		}
-		if !isAlphaNumeric(s[0]) {
-			break
-		}
-		if err := p.match(s); err != nil {
-			return "", err
-		}
-		name += s
+		_trans += _klen
 	}
 
-	if err := p.match("]"); err != nil {
-		return "", err
+_match:
+	_trans = int(_ini_indicies[_trans])
+	cs = int(_ini_trans_targs[_trans])
+
+	if _ini_trans_actions[_trans] == 0 {
+		goto _again
 	}
 
-	return name, p.parseTail()
-}
+	_acts = int(_ini_trans_actions[_trans])
+	_nacts = uint(_ini_actions[_acts]); _acts++
+	for ; _nacts > 0; _nacts-- {
+		_acts++
+		switch _ini_actions[_acts-1] {
+		case 0:
+//line ini.rl:6
+ start = p 
+		case 1:
+//line ini.rl:8
 
-func (p *parser) parseKvpair() (string, string, error) {
-	key, err := p.parseKey()
-	if err != nil {
-		return "", "", err
+		section = string(data[start:p])
+		// TODO(imax): detect duplicate sections.
+		ret[section] = map[string]string{}
+	
+		case 2:
+//line ini.rl:14
+
+		key = string(data[start:p])
+	
+		case 3:
+//line ini.rl:18
+
+		ret[section][key] = string(data[start:p])
+	
+//line ini.go:206
+		}
 	}
 
-	if err = p.parseWhitespace(); err != nil {
-		return "", "", err
+_again:
+	if cs == 0 {
+		goto _out
 	}
-	if err = p.match("="); err != nil {
-		return "", "", err
+	p++
+	if p != pe {
+		goto _resume
 	}
-	if err = p.parseWhitespace(); err != nil {
-		return "", "", err
-	}
-
-	val, err := p.parseValue()
-	if err != nil {
-		return "", "", err
+	_test_eof: {}
+	_out: {}
 	}
 
-	return key, val, p.parseTail()
-}
+//line ini.rl:53
 
-func (p *parser) parseKey() (string, error) {
-	var name string
-	for {
-		s, err := p.peek()
-		if err != nil {
-			return "", err
-		}
-		if !isAlphaNumeric(s[0]) {
-			return name, nil
-		}
-		if err := p.match(s); err != nil {
-			return "", err
-		}
-		name += s
-	}
-}
-
-func (p *parser) parseValue() (string, error) {
-	var v string
-	for {
-		s, err := p.peek()
-		if err == io.EOF {
-			return v, nil
-		}
-		if err != nil {
-			return "", err
-		}
-		if s[0] < 0x21 && !isWhitespace(s[0]) {
-			return v, nil
-		}
-		if err := p.match(s); err != nil {
-			return "", err
-		}
-		v += s
-	}
-}
-
-func (p *parser) parseTail() error {
-	err := p.parseWhitespace()
-	if err == io.EOF {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	s, err := p.peek()
-	if err == io.EOF {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	if s == ";" {
-		err = p.parseComment()
-		if err == io.EOF {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-	}
-	return p.parseEol()
-}
-
-func (p *parser) parseComment() error {
-	for {
-		s, err := p.peek()
-		if err != nil {
-			return err
-		}
-		if s == "\r" || s == "\n" {
-			return nil
-		}
-		if err := p.match(s); err != nil {
-			return err
-		}
-	}
-}
-
-func (p *parser) parseWhitespace() error {
-	for {
-		s, err := p.peek()
-		if err != nil {
-			return err
-		}
-		if !isWhitespace(s[0]) {
-			return nil
-		}
-		if err := p.match(s); err != nil {
-			return err
-		}
-	}
-}
-
-func (p *parser) parseEol() error {
-	s, err := p.peek()
-	if err != nil {
-		return err
-	}
-	switch s {
-	case "\r":
-		if err := p.match(s); err != nil {
-			return err
-		}
-		if err := p.match("\n"); err != nil {
-			return err
-		}
-		return nil
-	case "\n":
-		if err := p.match(s); err != nil {
-			return err
-		}
-		return nil
-	}
-	return p.Errorf("unexpected character %q (want \\r or \\n)", s)
+	return ret, nil
 }
