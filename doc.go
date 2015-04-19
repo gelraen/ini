@@ -24,3 +24,16 @@ func Parse(r io.Reader) (Document, error) {
 	}
 	return ragel_machine(data)
 }
+
+// String returns a Document in INI format. No guarantees about ordering of fields and sections.
+func (d Document) String() string {
+	r := ""
+	for section, values := range d {
+		r += "[" + section + "]\n"
+		for key, value := range values {
+			r += key + "=" + value + "\n"
+		}
+		r += "\n"
+	}
+	return r
+}
