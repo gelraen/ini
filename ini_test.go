@@ -8,7 +8,8 @@ import (
 
 func TestParse(t *testing.T) {
 	cases := map[string]Document{
-		"[section]\nkey=value\n\n": Document{"section": map[string]string{"key": "value"}},
+		"[section]\nkey=value\n\n":         Document{"section": map[string]string{"key": "value"}},
+		"[section]\nkey=no eol at the end": Document{"section": map[string]string{"key": "no eol at the end"}},
 	}
 
 	for in, expected := range cases {

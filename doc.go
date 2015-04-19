@@ -18,5 +18,9 @@ func Parse(r io.Reader) (Document, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Hack to avoid parser failure on missing newline at the EOF.
+	if data[len(data)-1] != '\n' {
+		data = append(data, '\n')
+	}
 	return ragel_machine(data)
 }
