@@ -1,5 +1,9 @@
 package ini
 
+import (
+	"fmt"
+)
+
 %%{
 	machine ini;
 
@@ -19,7 +23,16 @@ package ini
 		ret[section][key] = string(data[start:fpc])
 	}
 
-	eol = ("\n" | "\r\n");
+	action error {
+		return nil, fmt.Errorf("line %d char %d: parse failed in state %d", line, fpc - lineStart + 1, fcurs)
+	}
+
+	action incLine {
+		line++
+		lineStart = fpc
+	}
+
+	eol = ("\n" | "\r\n") % incLine;
 	comment = ";" . (^[\r\n])*;
 	ws = [\t ]*;
 	tail = ws . comment? . eol;
@@ -32,7 +45,7 @@ package ini
 	section = tail* header (kvpair | tail)*;
 	document = section*;
 
-	main := document;
+	main := document $!error;
 }%%
 
 %% write data;
@@ -46,6 +59,8 @@ func ragel_machine(data []byte) (Document, error) {
 		ret = Document{}
 		section = ""
 		key = ""
+		line = 1
+		lineStart = 0
 	)
 
 %% write init;

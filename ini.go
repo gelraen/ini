@@ -2,15 +2,20 @@
 //line ini.rl:1
 package ini
 
+import (
+	"fmt"
+)
 
-//line ini.rl:36
+
+//line ini.rl:49
 
 
 
-//line ini.go:11
+//line ini.go:15
 var _ini_actions []byte = []byte{
 	0, 1, 0, 1, 1, 1, 2, 1, 3, 
-	2, 0, 3, 
+	1, 4, 1, 5, 2, 0, 3, 2, 
+	5, 0, 
 }
 
 var _ini_key_offsets []byte = []byte{
@@ -48,31 +53,38 @@ var _ini_index_offsets []byte = []byte{
 }
 
 var _ini_indicies []byte = []byte{
-	0, 2, 3, 0, 4, 1, 0, 2, 
-	3, 0, 4, 5, 1, 2, 1, 2, 
-	3, 4, 6, 6, 6, 6, 6, 1, 
-	7, 8, 7, 7, 7, 7, 1, 9, 
-	10, 11, 9, 12, 1, 10, 1, 13, 
-	13, 14, 15, 14, 14, 14, 14, 1, 
-	16, 16, 17, 1, 19, 20, 21, 19, 
-	22, 18, 24, 25, 26, 24, 27, 23, 
-	10, 11, 12, 0, 2, 3, 0, 4, 
-	5, 1, 9, 10, 11, 9, 28, 12, 
-	5, 28, 28, 28, 28, 1, 
+	1, 2, 3, 1, 4, 0, 5, 6, 
+	7, 5, 8, 9, 0, 2, 0, 2, 
+	3, 4, 10, 10, 10, 10, 10, 0, 
+	11, 12, 11, 11, 11, 11, 0, 13, 
+	14, 15, 13, 16, 0, 14, 0, 17, 
+	17, 18, 19, 18, 18, 18, 18, 0, 
+	20, 20, 21, 0, 23, 24, 25, 23, 
+	26, 22, 28, 29, 30, 28, 31, 27, 
+	14, 15, 16, 1, 2, 3, 1, 4, 
+	32, 0, 33, 34, 35, 33, 36, 37, 
+	9, 36, 36, 36, 36, 0, 
 }
 
 var _ini_trans_targs []byte = []byte{
-	1, 0, 2, 3, 4, 5, 6, 6, 
-	7, 7, 15, 8, 13, 10, 9, 11, 
-	10, 11, 12, 11, 15, 8, 13, 12, 
-	12, 15, 8, 13, 9, 
+	0, 1, 2, 3, 4, 1, 2, 3, 
+	4, 5, 6, 6, 7, 7, 15, 8, 
+	13, 10, 9, 11, 10, 11, 12, 11, 
+	15, 8, 13, 12, 12, 15, 8, 13, 
+	5, 7, 15, 8, 9, 13, 
 }
 
 var _ini_trans_actions []byte = []byte{
-	0, 0, 0, 0, 0, 0, 1, 0, 
-	3, 0, 0, 0, 0, 5, 0, 5, 
-	0, 0, 1, 9, 9, 9, 9, 0, 
-	7, 7, 7, 7, 1, 
+	9, 0, 0, 0, 0, 11, 11, 11, 
+	11, 11, 1, 0, 3, 0, 0, 0, 
+	0, 5, 0, 5, 0, 0, 1, 13, 
+	13, 13, 13, 0, 7, 7, 7, 7, 
+	0, 11, 11, 11, 16, 11, 
+}
+
+var _ini_eof_actions []byte = []byte{
+	0, 9, 9, 9, 9, 9, 9, 9, 
+	9, 9, 9, 9, 9, 9, 0, 11, 
 }
 
 const ini_start int = 14
@@ -82,7 +94,7 @@ const ini_error int = 0
 const ini_en_main int = 14
 
 
-//line ini.rl:39
+//line ini.rl:52
 
 func ragel_machine(data []byte) (Document, error) {
 	var cs,p,pe,eof int
@@ -93,19 +105,22 @@ func ragel_machine(data []byte) (Document, error) {
 		ret = Document{}
 		section = ""
 		key = ""
+		line = 1
+		lineStart = 0
 	)
 
 
-//line ini.go:100
+//line ini.go:114
 	{
 	cs = ini_start
 	}
 
-//line ini.rl:52
+//line ini.rl:67
 
-//line ini.go:107
+//line ini.go:121
 	{
 	var _klen int
+	var _ps int
 	var _trans int
 	var _acts int
 	var _nacts uint
@@ -171,6 +186,7 @@ _resume:
 
 _match:
 	_trans = int(_ini_indicies[_trans])
+	_ps = cs
 	cs = int(_ini_trans_targs[_trans])
 
 	if _ini_trans_actions[_trans] == 0 {
@@ -183,26 +199,37 @@ _match:
 		_acts++
 		switch _ini_actions[_acts-1] {
 		case 0:
-//line ini.rl:6
+//line ini.rl:10
  start = p 
 		case 1:
-//line ini.rl:8
+//line ini.rl:12
 
 		section = string(data[start:p])
 		// TODO(imax): detect duplicate sections.
 		ret[section] = map[string]string{}
 	
 		case 2:
-//line ini.rl:14
+//line ini.rl:18
 
 		key = string(data[start:p])
 	
 		case 3:
-//line ini.rl:18
+//line ini.rl:22
 
 		ret[section][key] = string(data[start:p])
 	
-//line ini.go:206
+		case 4:
+//line ini.rl:26
+
+		return nil, fmt.Errorf("line %d char %d: parse failed in state %d", line, p - lineStart + 1, (_ps))
+	
+		case 5:
+//line ini.rl:30
+
+		line++
+		lineStart = p
+	
+//line ini.go:233
 		}
 	}
 
@@ -215,10 +242,32 @@ _again:
 		goto _resume
 	}
 	_test_eof: {}
+	if p == eof {
+		__acts := _ini_eof_actions[cs]
+		__nacts := uint(_ini_actions[__acts]); __acts++
+		for ; __nacts > 0; __nacts-- {
+			__acts++
+			switch _ini_actions[__acts-1] {
+			case 4:
+//line ini.rl:26
+
+		return nil, fmt.Errorf("line %d char %d: parse failed in state %d", line, p - lineStart + 1, (_ps))
+	
+			case 5:
+//line ini.rl:30
+
+		line++
+		lineStart = p
+	
+//line ini.go:263
+			}
+		}
+	}
+
 	_out: {}
 	}
 
-//line ini.rl:53
+//line ini.rl:68
 
 	return ret, nil
 }

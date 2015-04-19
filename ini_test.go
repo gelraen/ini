@@ -18,3 +18,19 @@ func TestParse(t *testing.T) {
 		}
 	}
 }
+
+func TestInvalidInputs(t *testing.T) {
+	cases := []string{
+		"[section\nkey=value\n\n",
+		"no_section=value\n",
+	}
+
+	for _, in := range cases {
+		v, err := Parse(strings.NewReader(in))
+		if err == nil {
+			t.Errorf("Parse(%q) = (%+v, nil), want error", in, v)
+		} else {
+			t.Logf("Parse(%q): %s", in, err)
+		}
+	}
+}
